@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "jest"
+    "test": "npx jest",
+    "test-watch": "npx jest --watch",
+    "coverage": "npx jest --coverage",
+    "deploy": "npx serverless deploy"
   },
   "dependencies": {
     "axios": "^1.7.7",

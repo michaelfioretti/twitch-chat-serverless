@@ -16,4 +16,8 @@ describe('constants', () => {
   it('should return the TWITCH_USERS_URL', () => {
     expect(Constants.TWITCH_USERS_URL).toBe('https://api.twitch.tv/helix/users')
   })
+
+  it('should return the TWITCH_STREAMER_FETCH_COUNT', () => {
+    expect(Constants.TWITCH_STREAMER_FETCH_COUNT).toBe(100)
+  })
 });
