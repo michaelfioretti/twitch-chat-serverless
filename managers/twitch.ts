@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { TwitchChannel, TwitchStream } from '../types/twitch'
-import { TWITCH_BASE_URL, TWITCH_SEARCH_URL, TWITCH_TOKEN_URL } from '../helpers/constants';
+import { TWITCH_BASE_URL, TWITCH_SEARCH_URL, TWITCH_STREAMS_URL, TWITCH_TOKEN_URL } from '../helpers/constants';
 
 class TwitchManager {
   private oauthToken: string | undefined;
@@ -23,22 +23,21 @@ class TwitchManager {
 
       return response.data.data;
     } catch (error) {
-      console.error('Error searching for channels:', error);
       throw error;
     }
   }
 
-  async GetStreamerInfoFromStreams(oauthToken: string, streams: TwitchStream[]) {
+  async GetStreamerInfoFromStreams(streams: TwitchStream[]) {
     if (!this.oauthToken) {
       await this.GetTwitchToken()
     }
 
     const userIds = streams.map((stream: TwitchStream) => stream.user_id);
-    const streamersResponse = await axios.get(`${TWITCH_BASE_URL}/users`, {
+    const streamersResponse = await axios.get(TWITCH_SEARCH_URL, {
       params: { id: userIds },
       headers: {
         'Client-ID': process.env.TWITCH_CLIENT_ID,
-        Authorization: `Bearer ${oauthToken}`,
+        Authorization: `Bearer ${this.oauthToken}`,
       },
     });
 
@@ -60,7 +59,7 @@ class TwitchManager {
       await this.GetTwitchToken()
     }
 
-    const streamsResponse = await axios.get(`${TWITCH_BASE_URL}/streams`, {
+    const streamsResponse = await axios.get(TWITCH_STREAMS_URL, {
       params: { 'first': 100 },
       headers: {
         'Client-ID': process.env.TWITCH_CLIENT_ID,
@@ -76,7 +75,7 @@ class TwitchManager {
       await this.GetTwitchToken()
     }
 
-    const streamsResponse = await axios.get(`${TWITCH_BASE_URL}/streams`, {
+    const streamsResponse = await axios.get(TWITCH_STREAMS_URL, {
       params: {
         user_id: channels.map((channel) => channel.id)
       },
