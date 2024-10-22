@@ -2,6 +2,12 @@
   "name": "twitch-chat-serverless",
   "version": "1.0.0",
   "description": "",
+  "scripts": {
+    "test": "npx jest",
+    "test-watch": "npx jest --watch",
+    "coverage": "npx jest --coverage",
+    "deploy": "npx serverless deploy"
+  },
   "dependencies": {
     "axios": "^1.7.7",
     "express": "^4.19.2",
@@ -9,7 +15,10 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.13",
+    "jest": "^29.7.0",
     "serverless-plugin-typescript": "^2.1.5",
+    "ts-jest": "^29.2.5",
     "typescript": "^5.6.3"
   }
 }

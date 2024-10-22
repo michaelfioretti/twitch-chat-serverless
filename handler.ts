@@ -6,7 +6,7 @@ const app = express();
 const twitchManager = new TwitchManager()
 
 app.get("/livestreams", async (_req: Request, res: Response) => {
-  const results = await twitchManager.GetTop100TwitchLiveStreams()
+  const results = await twitchManager.GetTopTwitchLiveStreams()
   res.json({ results })
 })
 
@@ -15,7 +15,6 @@ app.post('/search', async (req: Request, res: Response) => {
     res.status(400).send({
       message: 'Missing body parameter "query"'
     })
-
     return
   }
 
