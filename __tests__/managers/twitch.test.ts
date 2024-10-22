@@ -1,7 +1,7 @@
 import axios from 'axios';
 import TwitchManager from '../../managers/twitch'
 import { TwitchChannel, TwitchStream } from '../../types/twitch';
-import { TWITCH_SEARCH_URL, TWITCH_STREAMS_URL, TWITCH_USERS_URL } from '../../helpers/constants';
+import { TWITCH_SEARCH_URL, TWITCH_STREAMS_URL, TWITCH_TOKEN_URL, TWITCH_USERS_URL } from '../../helpers/constants';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -53,17 +53,16 @@ describe('TwitchManager', () => {
   });
 
   describe('SearchForTwitchChannel', () => {
-    it('should call GetTwitchToken if oauthToken is not set and return search results', async () => {
+    it('should return search results', async () => {
       const mockToken = 'mock_oauth_token';
 
-      jest.spyOn(twitchManager, 'GetTwitchToken').mockResolvedValueOnce();
+      jest.spyOn(twitchManager, 'GetTwitchToken').mockResolvedValue();
       twitchManager['oauthToken'] = mockToken;
 
       mockedAxios.get.mockResolvedValueOnce({ data: { data: mockTwitchChannelArr } });
 
       const result = await twitchManager.SearchForTwitchChannel('test_channel');
 
-      // expect(twitchManager.GetTwitchToken).toHaveBeenCalled();
       expect(mockedAxios.get).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
         headers: {
           'Client-ID': process.env.TWITCH_CLIENT_ID,
@@ -85,30 +84,6 @@ describe('TwitchManager', () => {
     });
   });
 
-  // describe('GetStreamerInfoFromStreams', () => {
-  //   it('should return streamer info from streams', async () => {
-  //     const mockStreams: TwitchStream[] = [mockTwitchStream];
-  //     const mockStreamerData = [{ id: '123', display_name: 'streamer_name' }];
-  //     const mockToken = 'mock_oauth_token';
-
-  //     jest.spyOn(twitchManager, 'GetTwitchToken').mockResolvedValueOnce(undefined);
-  //     twitchManager['oauthToken'] = mockToken;
-
-  //     mockedAxios.get.mockResolvedValueOnce({ data: { data: mockStreamerData } });
-
-  //     const result = await twitchManager.GetStreamerInfoFromStreams(mockToken, mockStreams);
-
-  //     expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining('/users'), expect.objectContaining({
-  //       params: { id: ['123'] },
-  //       headers: {
-  //         'Client-ID': process.env.TWITCH_CLIENT_ID,
-  //         Authorization: `Bearer ${mockToken}`
-  //       }
-  //     }));
-  //     expect(result).toEqual(mockStreamerData);
-  //   });
-  // });
-
   describe('GetTwitchToken', () => {
     it('should fetch and set the OAuth token', async () => {
       const mockToken = 'new_mock_token';
@@ -117,7 +92,7 @@ describe('TwitchManager', () => {
 
       await twitchManager.GetTwitchToken();
 
-      expect(mockedAxios.post).toHaveBeenCalledWith(expect.stringContaining('/oauth2/token'), {
+      expect(mockedAxios.post).toHaveBeenCalledWith(TWITCH_TOKEN_URL, {
         client_id: process.env.TWITCH_CLIENT_ID,
         client_secret: process.env.TWITCH_CLIENT_SECRET,
         grant_type: 'client_credentials',
