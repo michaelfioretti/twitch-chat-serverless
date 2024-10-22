@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { TwitchChannel, TwitchStream } from '../types/twitch'
-import { TWITCH_BASE_URL, TWITCH_SEARCH_URL, TWITCH_STREAMS_URL, TWITCH_TOKEN_URL } from '../helpers/constants';
+import { TWITCH_SEARCH_URL, TWITCH_STREAMS_URL, TWITCH_TOKEN_URL } from '../helpers/constants';
 
 class TwitchManager {
   private oauthToken: string | undefined;

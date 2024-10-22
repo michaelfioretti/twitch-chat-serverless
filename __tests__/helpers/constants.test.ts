@@ -1,10 +1,6 @@
 import * as Constants from '../../helpers/constants'
 
 describe('constants', () => {
-  it('should return the TWITCH_BASE_URL', async () => {
-    expect(Constants.TWITCH_BASE_URL).toBe('https://api.twitch.tv/helix')
-  })
-
   it('should return the TWITCH_STREAMS_URL', async () => {
     expect(Constants.TWITCH_STREAMS_URL).toBe('https://api.twitch.tv/helix/streams')
   })
