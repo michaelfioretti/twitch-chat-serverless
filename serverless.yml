@@ -1,0 +1,22 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: mfioretti
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: twitch-chat-serverless
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: twitch-chat-serverless
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  environment:
+    TWITCH_CLIENT_ID: ${param:TWITCH_CLIENT_ID}
+    TWITCH_CLIENT_SECRET: ${param:TWITCH_CLIENT_SECRET}
+
+plugins:
+  - serverless-plugin-typescript
+
+functions:
+  api:
+    handler: handler.handler
+    events:
+      - httpApi: "*"

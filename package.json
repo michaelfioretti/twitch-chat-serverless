@@ -1,0 +1,15 @@
+{
+  "name": "twitch-chat-serverless",
+  "version": "1.0.0",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "express": "^4.19.2",
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "serverless-plugin-typescript": "^2.1.5",
+    "typescript": "^5.6.3"
+  }
+}
