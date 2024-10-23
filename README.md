@@ -1,6 +1,6 @@
-# Twitch Chat Serverless
+# Twitch App Serverless
 
-A serverless application that interacts with the Twitch API to fetch live stream and chat data, built using AWS Lambda, TypeScript, and the Serverless Framework.
+A serverless application that interacts with the Twitch API to fetch live stream and chat data, built using AWS Lambda, TypeScript, and the Serverless Framework. This is the backend for the [Twitch Livestream App](https://github.com/michaelfioretti/twitch-livestream-app) that I built.
 
 ![Codecov](https://img.shields.io/codecov/c/github/michaelfioretti/twitch-livestream-app-serverless)
 

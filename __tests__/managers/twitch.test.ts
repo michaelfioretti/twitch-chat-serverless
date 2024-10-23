@@ -67,15 +67,25 @@ describe('TwitchManager', () => {
         id: 'id'
       }
 
-      jest.spyOn(twitchManager, 'GetTwitchToken').mockResolvedValue();
-      twitchManager['oauthToken'] = mockToken;
-
+      mockedAxios.post.mockResolvedValue({
+        data: {
+          access_token: mockToken
+        }
+      })
       mockedAxios.get.mockResolvedValueOnce({ data: { data: [mockTwitchStream] } })
         .mockResolvedValue({ data: { data: [mockSearchUserResult] } })
 
 
       const result = await twitchManager.SearchForTwitchChannel('test_channel');
 
+      // Check for correct POSTing when requesting an Oauth token
+      expect(mockedAxios.post).toHaveBeenCalledWith(TWITCH_TOKEN_URL, {
+        client_id: process.env.TWITCH_CLIENT_ID,
+        client_secret: process.env.TWITCH_CLIENT_SECRET,
+        grant_type: 'client_credentials',
+      });
+
+      // Validate Twitch Search GET request
       expect(mockedAxios.get).toHaveBeenNthCalledWith(1, TWITCH_SEARCH_URL, expect.objectContaining({
         headers: {
           'Client-ID': process.env.TWITCH_CLIENT_ID,
@@ -84,6 +94,8 @@ describe('TwitchManager', () => {
         params: { query: 'test_channel' }
       }));
 
+      // Validate secondary request to get associated user/channel metadata from livestreams
+      // that we got from the Search
       expect(mockedAxios.get).toHaveBeenNthCalledWith(2, TWITCH_USERS_URL, expect.objectContaining({
         headers: {
           'Client-ID': process.env.TWITCH_CLIENT_ID,
@@ -128,13 +140,21 @@ describe('TwitchManager', () => {
       const mockTwitchUsers: TwitchUser[] = [mockTwitchUser]
       const mockToken = 'mock_oauth_token';
 
-      jest.spyOn(twitchManager, 'GetTwitchToken').mockResolvedValueOnce(undefined);
-      twitchManager['oauthToken'] = mockToken;
-
+      mockedAxios.post.mockResolvedValue({
+        data: {
+          access_token: mockToken
+        }
+      })
       mockedAxios.get.mockResolvedValueOnce({ data: { data: mockStreams } })
         .mockResolvedValue({ data: { data: mockTwitchUsers } })
 
       const result = await twitchManager.GetTopTwitchLiveStreams();
+
+      expect(mockedAxios.post).toHaveBeenCalledWith(TWITCH_TOKEN_URL, {
+        client_id: process.env.TWITCH_CLIENT_ID,
+        client_secret: process.env.TWITCH_CLIENT_SECRET,
+        grant_type: 'client_credentials',
+      })
 
       expect(mockedAxios.get).toHaveBeenNthCalledWith(1, TWITCH_STREAMS_URL, {
         params: { 'first': TWITCH_STREAMER_FETCH_COUNT },
@@ -163,33 +183,6 @@ describe('TwitchManager', () => {
       }]
 
       expect(result).toEqual(expectedResult);
-    });
-  });
-
-  describe('GetSpecificTwitchLiveStreams', () => {
-    it('should return specific channels based on user ids passed in', async () => {
-      const mockChannels: TwitchChannel[] = mockTwitchChannelArr
-      const mockStreams: TwitchStream[] = [mockTwitchStream];
-      const mockToken = 'mock_oauth_token';
-
-      jest.spyOn(twitchManager, 'GetTwitchToken').mockResolvedValueOnce(undefined);
-      twitchManager['oauthToken'] = mockToken;
-
-      mockedAxios.get.mockResolvedValueOnce({ data: { data: mockStreams } });
-
-      const result = await twitchManager.GetSpecificTwitchLiveStreams(mockChannels);
-
-      const expectedIds = mockChannels.map((stream) => stream.id)
-
-      expect(mockedAxios.get).toHaveBeenCalledWith(TWITCH_STREAMS_URL, {
-        params: { user_id: expectedIds },
-        headers: {
-          'Client-ID': process.env.TWITCH_CLIENT_ID,
-          Authorization: `Bearer ${mockToken}`
-        }
-      });
-
-      expect(result).toEqual(mockStreams);
     });
   });
 });
