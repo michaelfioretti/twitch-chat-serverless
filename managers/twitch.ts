@@ -71,7 +71,7 @@ class TwitchManager {
       // Twitch documentation: https://dev.twitch.tv/docs/api/reference/#search-channels
       const streams = response.data.data
       const userIds = streams.map((stream: TwitchStream) => stream.id)
-      const streamersResponse = await axios.get(TWITCH_USERS_URL, {
+      const channelsResponse = await axios.get(TWITCH_USERS_URL, {
         params: { id: userIds },
         headers: {
           'Client-ID': process.env.TWITCH_CLIENT_ID,
@@ -79,16 +79,16 @@ class TwitchManager {
         },
       });
 
-      // @TODO: Clean this up/optimize
-      // Note: Same as other code, but currently checking id instead of user_id
-      const streamers = streamersResponse.data.data
+      // Note: Similar to combineStreamerAndStreamData, but here we need to filter based
+      // on the id of the stream fetched, not user_id like in the previous response
+      const channels = channelsResponse.data.data
       return streams.map((stream: TwitchStream) => {
-        const streamer = streamers.find((streamer: Streamer) => streamer.id === stream.id);
+        const channel = channels.find((channel: TwitchChannel) => channel.id === stream.id);
 
         return {
           ...stream,
-          streamerName: streamer?.display_name,
-          profileImage: streamer?.profile_image_url,
+          streamerName: channel?.display_name,
+          profileImage: channel?.profile_image_url,
         };
       })
     } catch (error) {
