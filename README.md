@@ -1,8 +1,33 @@
-# Twitch Chat Serverless API
+# Twitch Chat Serverless
 
-A backend NodeJS/Express based service that provides an API interface for the [Twitch App](https://github.com/michaelfioretti/twitch-chat-stats). Built using [Serverless](https://www.serverless.com/)
+A serverless application that interacts with the Twitch API to fetch live stream and chat data, built using AWS Lambda, TypeScript, and the Serverless Framework.
 
-## Testing
+![GitHub CI](https://github.com/dwyl/auth_plug/actions/workflows/ci.yml/badge.svg)
+
+## Features
+
+- **Fetch Twitch Stream Data**: Get real-time stream details.
+- **Stream Search**: Search for individual streams or streamers
+- **TypeScript**: Full TypeScript support for better type safety.
+- **Serverless**: Deployed via AWS Lambda for scalability and cost-efficiency.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js v16+
+- npm
+- Serverless Framework (`npm install -g serverless`)
+- Twitch Developer API credentials
+
+### Installation
+```bash
+git clone https://github.com/michaelfioretti/twitch-chat-serverless.git
+cd twitch-chat-serverless
+npm install
+```
+
+### Testing
 Tests can be ran via the following:
 
 `npm test`
