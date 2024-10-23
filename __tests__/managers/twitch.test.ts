@@ -1,6 +1,6 @@
 import axios from 'axios';
 import TwitchManager from '../../managers/twitch'
-import { Streamer, TwitchChannel, TwitchStream } from '../../types/twitch';
+import { TwitchUser, TwitchChannel, TwitchStream } from '../../types/twitch';
 import { TWITCH_SEARCH_URL, TWITCH_STREAMER_FETCH_COUNT, TWITCH_STREAMS_URL, TWITCH_TOKEN_URL, TWITCH_USERS_URL } from '../../helpers/constants';
 
 jest.mock('axios');
@@ -27,9 +27,9 @@ const mockTwitchStream: TwitchStream = {
   id: 'id',
   is_mature: false,
   language: 'english',
-  profileImage: 'https://profileimg',
+  profileImage: 'profile_image_url',
   started_at: 'started_at',
-  streamerName: 'streamer_123',
+  streamerName: 'display_name',
   tag_ids: ['tag_ids_1', 'tag_ids_2'],
   tags: ['tags_1', 'tags_2'],
   thumbnail_url: 'thumbnail_url',
@@ -41,7 +41,7 @@ const mockTwitchStream: TwitchStream = {
   viewer_count: 12345
 }
 
-const mockTwitchStreamer: Streamer = {
+const mockTwitchUser: TwitchUser = {
   id: 'user_id',
   display_name: 'display_name',
   profile_image_url: 'profile_image_url',
@@ -62,15 +62,21 @@ describe('TwitchManager', () => {
   describe('SearchForTwitchChannel', () => {
     it('should return search results', async () => {
       const mockToken = 'mock_oauth_token';
+      const mockSearchUserResult = {
+        ...mockTwitchUser,
+        id: 'id'
+      }
 
       jest.spyOn(twitchManager, 'GetTwitchToken').mockResolvedValue();
       twitchManager['oauthToken'] = mockToken;
 
-      mockedAxios.get.mockResolvedValueOnce({ data: { data: mockTwitchChannelArr } });
+      mockedAxios.get.mockResolvedValueOnce({ data: { data: [mockTwitchStream] } })
+        .mockResolvedValue({ data: { data: [mockSearchUserResult] } })
+
 
       const result = await twitchManager.SearchForTwitchChannel('test_channel');
 
-      expect(mockedAxios.get).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+      expect(mockedAxios.get).toHaveBeenNthCalledWith(1, TWITCH_SEARCH_URL, expect.objectContaining({
         headers: {
           'Client-ID': process.env.TWITCH_CLIENT_ID,
           Authorization: `Bearer ${mockToken}`,
@@ -78,7 +84,15 @@ describe('TwitchManager', () => {
         params: { query: 'test_channel' }
       }));
 
-      expect(result).toEqual(mockTwitchChannelArr);
+      expect(mockedAxios.get).toHaveBeenNthCalledWith(2, TWITCH_USERS_URL, expect.objectContaining({
+        headers: {
+          'Client-ID': process.env.TWITCH_CLIENT_ID,
+          Authorization: `Bearer ${mockToken}`,
+        },
+        params: { id: [mockTwitchStream.id] }
+      }));
+
+      expect(result).toEqual([mockTwitchStream]);
     });
 
     it('should throw an error if the API call fails', async () => {
@@ -110,18 +124,15 @@ describe('TwitchManager', () => {
 
   describe('GetTopTwitchLiveStreams', () => {
     it('should return the top 100 live streams', async () => {
-      // Since we are fetching data about each streamer from their associated
-      // livestream, we will need to mock both a TwitchStream[] as well as
-      // a Streamer[]
       const mockStreams: TwitchStream[] = [mockTwitchStream];
-      const mockStreamers: Streamer[] = [mockTwitchStreamer]
+      const mockTwitchUsers: TwitchUser[] = [mockTwitchUser]
       const mockToken = 'mock_oauth_token';
 
       jest.spyOn(twitchManager, 'GetTwitchToken').mockResolvedValueOnce(undefined);
       twitchManager['oauthToken'] = mockToken;
 
       mockedAxios.get.mockResolvedValueOnce({ data: { data: mockStreams } })
-        .mockResolvedValue({ data: { data: mockStreamers } })
+        .mockResolvedValue({ data: { data: mockTwitchUsers } })
 
       const result = await twitchManager.GetTopTwitchLiveStreams();
 
@@ -147,8 +158,8 @@ describe('TwitchManager', () => {
       // to the mock streams fetched before checking for the expected result
       const expectedResult = [{
         ...mockTwitchStream,
-        streamerName: mockTwitchStreamer.display_name,
-        profileImage: mockTwitchStreamer.profile_image_url
+        streamerName: mockTwitchUser.display_name,
+        profileImage: mockTwitchUser.profile_image_url
       }]
 
       expect(result).toEqual(expectedResult);

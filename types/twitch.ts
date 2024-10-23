@@ -33,7 +33,7 @@ export interface TwitchChannel {
   started_at: string,
 }
 
-export interface Streamer {
+export interface TwitchUser {
   id: string;
   display_name: string;
   profile_image_url: string;
@@ -73,11 +73,4 @@ export interface TwitchChannel {
   thumbnail_url: string,
   title: string,
   started_at: string,
-}
-
-export interface Streamer {
-  id: string;
-  display_name: string;
-  profile_image_url: string;
-  description: string;
 }

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { TwitchChannel, TwitchStream, Streamer } from '../types/twitch'
+import { TwitchChannel, TwitchStream, TwitchUser } from '../types/twitch'
 import { TWITCH_SEARCH_URL, TWITCH_STREAMER_FETCH_COUNT, TWITCH_STREAMS_URL, TWITCH_TOKEN_URL, TWITCH_USERS_URL } from '../helpers/constants';
 import { combineStreamerAndStreamData } from '../helpers/twitch';
 
@@ -42,11 +42,14 @@ class TwitchManager {
     return combineStreamerAndStreamData(streams, streamers)
   }
 
-  async SearchForTwitchChannel(query: string): Promise<TwitchChannel[]> {
+  async SearchForTwitchChannel(query: string): Promise<TwitchStream[]> {
     if (!this.oauthToken) {
       await this.GetTwitchToken()
     }
 
+    // The search below will return an array of TwitchChannel types. After this, we
+    // need to get the associated streamer information like when we fetch the top
+    // 100 livestreams
     try {
       const response = await axios.get(TWITCH_SEARCH_URL, {
         headers: {
@@ -54,11 +57,40 @@ class TwitchManager {
           Authorization: `Bearer ${this.oauthToken}`,
         },
         params: {
-          query: query,
+          query
         },
       });
 
-      return response.data.data;
+      // Now we need to associated the specific Twitch streamers to their
+      // livestreams that are currently active.
+      //
+      // Note: We are specifying "id" on the stream instead of "user_id" since,
+      // in this case, the endpoint specifies that the 'id' parameter ties the
+      // stream to the broadcaster.
+      //
+      // Twitch documentation: https://dev.twitch.tv/docs/api/reference/#search-channels
+      const streams = response.data.data
+      const userIds = streams.map((stream: TwitchStream) => stream.id)
+      const twitchUsersResponse = await axios.get(TWITCH_USERS_URL, {
+        params: { id: userIds },
+        headers: {
+          'Client-ID': process.env.TWITCH_CLIENT_ID,
+          Authorization: `Bearer ${this.oauthToken}`,
+        },
+      });
+
+      // Note: Similar to combineStreamerAndStreamData, but here we need to filter based
+      // on the id of the stream fetched, not user_id like in the previous response
+      const twitchUsers = twitchUsersResponse.data.data
+      return streams.map((stream: TwitchStream) => {
+        const twitchUser: TwitchUser = twitchUsers.find((twitchUser: TwitchUser) => twitchUser.id === stream.id);
+
+        return {
+          ...stream,
+          streamerName: twitchUser.display_name,
+          profileImage: twitchUser.profile_image_url,
+        };
+      })
     } catch (error) {
       throw error;
     }
