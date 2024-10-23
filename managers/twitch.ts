@@ -42,6 +42,13 @@ class TwitchManager {
     return combineStreamerAndStreamData(streams, streamers)
   }
 
+  /**
+   * Allows a user to search for a specific livestream, topic, channel, etc
+   *
+   * @param   {string}   query          The query that was passed up from the client
+   *
+   * @return  {Promise<TwitchStream>[]} Associated TwitchStreams that were found based off of the query
+   */
   async SearchForTwitchChannel(query: string): Promise<TwitchStream[]> {
     if (!this.oauthToken) {
       await this.GetTwitchToken()
@@ -96,24 +103,12 @@ class TwitchManager {
     }
   }
 
-  async GetSpecificTwitchLiveStreams(channels: TwitchChannel[]): Promise<TwitchStream[]> {
-    if (!this.oauthToken) {
-      await this.GetTwitchToken()
-    }
-
-    const streamsResponse = await axios.get(TWITCH_STREAMS_URL, {
-      params: {
-        user_id: channels.map((channel) => channel.id)
-      },
-      headers: {
-        'Client-ID': process.env.TWITCH_CLIENT_ID,
-        'Authorization': `Bearer ${this.oauthToken}`,
-      },
-    });
-
-    return streamsResponse.data.data;
-  }
-
+  /**
+   * Requests an Oauth token based off of our Twitch client ID and secret. Used to access authenticated
+   * endpoints from the Twitch Helix API
+   *
+   * @return  {<Promise><void>}
+   */
   async GetTwitchToken(): Promise<void> {
     const response = await axios.post(TWITCH_TOKEN_URL, {
       client_id: process.env.TWITCH_CLIENT_ID,
