@@ -50,7 +50,6 @@ class TwitchManager {
     // The search below will return an array of TwitchChannel types. After this, we
     // need to get the associated streamer information like when we fetch the top
     // 100 livestreams
-    console.log('here is the body that we got: ', query)
     try {
       const response = await axios.get(TWITCH_SEARCH_URL, {
         headers: {
@@ -63,9 +62,15 @@ class TwitchManager {
       });
 
       // Now we need to associated the specific Twitch streamers to their
-      // livestreams that are currently active
+      // livestreams that are currently active.
+      //
+      // Note: We are specifying "id" on the stream instead of "user_id" since,
+      // in this case, the endpoint specifies that the 'id' parameter ties the
+      // stream to the broadcaster.
+      //
+      // Twitch documentation: https://dev.twitch.tv/docs/api/reference/#search-channels
       const streams = response.data.data
-      const userIds = streams.map((stream: TwitchStream) => stream.user_id)
+      const userIds = streams.map((stream: TwitchStream) => stream.id)
       const streamersResponse = await axios.get(TWITCH_USERS_URL, {
         params: { id: userIds },
         headers: {
@@ -74,9 +79,18 @@ class TwitchManager {
         },
       });
 
+      // @TODO: Clean this up/optimize
+      // Note: Same as other code, but currently checking id instead of user_id
       const streamers = streamersResponse.data.data
+      return streams.map((stream: TwitchStream) => {
+        const streamer = streamers.find((streamer: Streamer) => streamer.id === stream.id);
 
-      return combineStreamerAndStreamData(streams, streamers)
+        return {
+          ...stream,
+          streamerName: streamer?.display_name,
+          profileImage: streamer?.profile_image_url,
+        };
+      })
     } catch (error) {
       throw error;
     }

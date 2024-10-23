@@ -15,7 +15,6 @@ app.get("/livestreams", async (_req: Request, res: Response) => {
 })
 
 app.post('/search', async (req: Request, res: Response) => {
-  console.log('here is the req boduy: ', req.body)
   if (!req.body.query) {
     res.status(400).send({
       message: 'Missing body parameter "query"'
