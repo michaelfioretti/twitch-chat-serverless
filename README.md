@@ -2,6 +2,8 @@
 
 A serverless application that interacts with the Twitch API to fetch live stream and chat data, built using AWS Lambda, TypeScript, and the Serverless Framework.
 
+![Codecov](https://img.shields.io/codecov/c/github/michaelfioretti/twitch-livestream-app-serverless)
+
 ## Features
 
 - **Fetch Twitch Stream Data**: Get real-time stream details.

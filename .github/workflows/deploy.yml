@@ -22,8 +22,8 @@ jobs:
         run: npm install
       - name: Install Serverless
         run: npm install -g serverless
-      - name: Run unit tests
-        run: npm run test
+      - name: Generate coverage
+        run: npm run coverage
       - name: Deploy to Serverless
         uses: serverless/github-action@v3.2
         with:
