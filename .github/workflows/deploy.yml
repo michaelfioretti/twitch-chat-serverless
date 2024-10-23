@@ -20,10 +20,12 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-      - name: Install Serverless
-        run: npm install -g serverless
       - name: Generate coverage
         run: npm run coverage
+      - name: Upload results to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
       - name: Deploy to Serverless
         uses: serverless/github-action@v3.2
         with:
