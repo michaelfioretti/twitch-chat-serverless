@@ -2,8 +2,6 @@
 
 A serverless application that interacts with the Twitch API to fetch live stream and chat data, built using AWS Lambda, TypeScript, and the Serverless Framework.
 
-![GitHub CI](https://github.com/dwyl/auth_plug/actions/workflows/ci.yml/badge.svg)
-
 ## Features
 
 - **Fetch Twitch Stream Data**: Get real-time stream details.
